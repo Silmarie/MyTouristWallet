@@ -30,6 +30,7 @@
   <ItemGroup>
     <Compile Include="MyTouristWallet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="HomePage.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xamarin.Forms.Core">
