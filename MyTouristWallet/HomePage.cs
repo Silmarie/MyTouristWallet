@@ -1,5 +1,10 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace MyTouristWallet
@@ -9,9 +14,18 @@ namespace MyTouristWallet
 		Label lab1, lab2, labValue;
 		Entry entry1, entry2;
 		Button button;
+		Picker curr1, curr2;
+		Image arrow;
+
+		Dictionary<string, string> currencies = new Dictionary<string, string>
+		{
+			{ "EUR", "Euro" },
+			{ "USD", "Dollars" }
+		};
 
 		public HomePage()
 		{
+
 			lab1 = new Label()
 			{
 				HorizontalOptions = LayoutOptions.Start,
@@ -41,22 +55,52 @@ namespace MyTouristWallet
 				Placeholder = "Value",
 			};
 
+			//Currency Type Pickers
+			curr1 = new Picker()
+			{
+				Title = "Currency",
+				HorizontalOptions = LayoutOptions.FillAndExpand
+			};
+			foreach (string currencyName in currencies.Keys)
+			{
+				curr1.Items.Add(currencyName);
+			}
+
+			curr2 = new Picker()
+			{
+				Title = "Currency",
+				HorizontalOptions = LayoutOptions.FillAndExpand
+
+			};
+			foreach (string currencyName in currencies.Keys)
+			{
+				curr2.Items.Add(currencyName);
+			}
+
+
 			var stack1 = new StackLayout()
 			{
 				Orientation = StackOrientation.Vertical,
-				Children = { lab1, entry1 }
+				Children = { lab1, entry1, curr1 }
+			};
+
+			arrow = new Image()
+			{
+				Aspect = Aspect.AspectFit,
+				Source = ImageSource.FromFile("arrow.png")
 			};
 
 			var stack2 = new StackLayout()
 			{
 				Orientation = StackOrientation.Vertical,
-				Children = { lab2, entry2 }
+				Children = { lab2, entry2, curr2 }
 			};
 
 			var stack = new StackLayout()
 			{
 				Orientation = StackOrientation.Horizontal,
-				Children = { stack1, stack2 }
+				HorizontalOptions = LayoutOptions.CenterAndExpand,
+				Children = { stack1, arrow, stack2 }
 			};
 
 			button = new Button()
@@ -81,9 +125,27 @@ namespace MyTouristWallet
 			BackgroundColor = Color.Gray;
 		}
 
-		private void OnButton_Clicked(object sender, EventArgs e)
+		private async void OnButton_Clicked(object sender, EventArgs e)
 		{
-			labValue.Text = String.Format("Result: \nCurrency 1: {0}, Currency 2: {1}", entry1.Text, entry2.Text);
+			var firstCurrency = curr1.Items[curr1.SelectedIndex];
+			var secondCurrency = curr2.Items[curr2.SelectedIndex];
+			string url = "http://download.finance.yahoo.com/d/quotes?f=sl1d1t1&s=" +
+				firstCurrency + secondCurrency + "=X";
+			string json = await GetCurrencyValue(url);
+			string[] value = json.Split(',');
+			decimal convertedValue = decimal.Parse(entry1.Text) * decimal.Parse(value[1]); 
+			entry2.Text = convertedValue.ToString();
+			labValue.Text = json;//String.Format("Result: \nCurrency 1: {0}, Currency 2: {1}", entry1.Text, entry2.Text);
+
+		}
+
+		public static async Task<string> GetCurrencyValue(string url)
+		{
+			var httpClient = new HttpClient();
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+			var response = await httpClient.SendAsync(request);
+			string result = await response.Content.ReadAsStringAsync();
+			return result;
 		}
 	}
 }

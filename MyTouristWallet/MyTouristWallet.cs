@@ -1,5 +1,8 @@
 ﻿using System;
-
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace MyTouristWallet
@@ -31,5 +34,6 @@ namespace MyTouristWallet
 		{
 			// Handle when your app resumes
 		}
+
 	}
 }
