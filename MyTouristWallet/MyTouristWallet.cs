@@ -12,7 +12,7 @@ namespace MyTouristWallet
 		public App()
 		{
 			// The root page of your application
-			var content = new HomePage
+			var content = new Wallet
 			{
 				Title = "MyTouristWallet",
 			};

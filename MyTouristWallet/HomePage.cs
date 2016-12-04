@@ -59,7 +59,7 @@ namespace MyTouristWallet
 			curr1 = new Picker()
 			{
 				Title = "Currency",
-				HorizontalOptions = LayoutOptions.FillAndExpand
+				HorizontalOptions = LayoutOptions.Start
 			};
 			foreach (string currencyName in currencies.Keys)
 			{
@@ -69,7 +69,7 @@ namespace MyTouristWallet
 			curr2 = new Picker()
 			{
 				Title = "Currency",
-				HorizontalOptions = LayoutOptions.FillAndExpand
+				HorizontalOptions = LayoutOptions.Start
 
 			};
 			foreach (string currencyName in currencies.Keys)
