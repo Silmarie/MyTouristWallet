@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xamarin.Forms;
 
 namespace MyTouristWallet
 {
-	public partial class Wallet : ContentPage
+	public partial class MyWallet : ContentPage
 	{
-		ObservableCollection<Amount> amountList = new ObservableCollection<Amount>();
+		static Database database;
+		static List<CurrencyCall> calls = new List<CurrencyCall>();
+		ObservableCollection<Amount> amountList;
 
 		Dictionary<string, string> currencies = new Dictionary<string, string>
 		{
@@ -19,30 +26,60 @@ namespace MyTouristWallet
 			{ "HKD", "Hong Kong Dollars" }
 		};
 
-		public Wallet()
+		public MyWallet()
 		{
 			InitializeComponent();
 
-			Amount amount1 = new Amount("EUR", "Euros", 10, "Blue");
-			Amount amount2 = new Amount("USD", "Dollars", 20, "Red");
-			Amount amount3 = new Amount("GBP", "Pounds", 30, "Green");
-			Amount amount4 = new Amount("HKD", "Hong Kong Dollars", 40, "Yellow");
-
-			amountList.Add(amount1);
-			amountList.Add(amount2);
-			amountList.Add(amount3);
-			amountList.Add(amount4);
-
+			amountList = new ObservableCollection<Amount>(Database.GetAmounts());
 			walletView.ItemsSource = amountList;
-
 
 			foreach (string currencyName in currencies.Keys)
 			{
 				curr.Items.Add(currencyName);
 			}
 
-			calculate.Clicked += SumAmounts;
+			/*foreach (string currencyName in currencies.Keys)
+			{
+				newCurrency.Items.Add(currencyName);
+			}*/
 
+			calculate.Clicked += SumAmounts;
+		}
+
+		public static Database Database
+		{
+			get
+			{
+				if (database == null)
+				{
+					database = new Database();
+				}
+				return database;
+			}
+		}
+
+		void OnSelection(object sender, SelectedItemChangedEventArgs e)
+		{
+			if (e.SelectedItem == null)
+			{
+				return;
+				//ItemSelected is called on deselection, 
+				//which results in SelectedItem being set to null
+			}
+			//var vSelUser = (Employee)e.SelectedItem;
+			//Navigation.PushAsync(new ShowEmplyee(vSelUser));
+		}
+
+		void Handle_Clicked(object sender, System.EventArgs e)
+		{
+		//	amountEntry.IsVisible = true;
+		}
+
+		//Add new amount
+		void OnNewClicked(object sender, EventArgs args)
+		{
+			//newCurrency.IsVisible = true;
+			//amountEntry.IsVisible = true;
 		}
 
 		private async void SumAmounts(object sender, EventArgs e)
@@ -53,9 +90,9 @@ namespace MyTouristWallet
 			decimal sum = Decimal.Zero;
 			decimal convertedValue;
 
-			foreach (Amount amount in amountList)
+			foreach (Amount a in amountList)
 			{
-				convertedValue = await ConvertValue(amount.value, amount.currency, targetCurrency);
+				convertedValue = await ConvertValue(a.value, a.currency, targetCurrency);
 				sum = Decimal.Add(sum, convertedValue);
 			}
 
@@ -79,11 +116,16 @@ namespace MyTouristWallet
 			var response = await httpClient.SendAsync(request);
 			string result = await response.Content.ReadAsStringAsync();
 
-			string[] rate = result.Split(',');
-			decimal convertedValue = value * decimal.Parse(rate[1]);
+			string[] answer = result.Split(',');
 
-			return convertedValue;
+			//save time by saving currency rates
+			CurrencyCall conversion = new CurrencyCall(answer[0], decimal.Parse(answer[1]), answer[2], answer[3]);
+			calls.Add(conversion);
+			//------
+
+			return conversion.rate;
 		}
+
 	}
 
 

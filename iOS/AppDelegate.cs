@@ -15,7 +15,7 @@ namespace MyTouristWallet.iOS
 			global::Xamarin.Forms.Forms.Init();
 
 			LoadApplication(new App());
-
+			Xamarin.Forms.DependencyService.Register<SQLite_iOS>();
 			return base.FinishedLaunching(app, options);
 		}
 	}

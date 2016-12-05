@@ -1,8 +1,17 @@
 ﻿using System;
+using SQLite;
+
 namespace MyTouristWallet
 {
 	public class Amount
 	{
+		public Amount()
+		{
+			
+		}
+
+		[PrimaryKey, AutoIncrement]
+		public int ID { get; set; }
 		public string currency { get; set; }
 		public string description { get; set; }
 		public decimal value { get; set; }

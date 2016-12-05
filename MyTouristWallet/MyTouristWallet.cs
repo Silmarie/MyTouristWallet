@@ -9,10 +9,11 @@ namespace MyTouristWallet
 {
 	public class App : Application
 	{
+
 		public App()
 		{
 			// The root page of your application
-			var content = new Wallet
+			var content = new MyWallet
 			{
 				Title = "MyTouristWallet",
 			};

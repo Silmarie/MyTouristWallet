@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="MyTouristWallet.MyWallet">
+	<ContentPage.Padding>
+		<OnPlatform x:TypeArguments="Thickness" iOS="0, 20, 0, 0" />
+	</ContentPage.Padding>
+	<ContentPage.Content>
+		<StackLayout Orientation="Vertical">
+			<ListView x:Name="walletView" HasUnevenRows="false" Header="Header Value" Footer="Footer" ItemSelected="OnSelection">
+				<ListView.HeaderTemplate>
+					<DataTemplate>
+						<StackLayout Orientation="Horizontal" BackgroundColor="Blue" Padding="5,5,5,5">
+							<Label Text="Name" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
+							<Label Text="Designation" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
+							<Label Text="Department" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
+						</StackLayout>
+					</DataTemplate>
+				</ListView.HeaderTemplate>
+				<ListView.ItemTemplate>
+					<DataTemplate>
+						<ViewCell>
+							<StackLayout Orientation="Horizontal" Padding="5,5,5,5">
+								<Label Text="{Binding value}" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
+								<Label Text="{Binding description}" HorizontalOptions="StartAndExpand" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
+							</StackLayout>
+						</ViewCell>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+				<ListView.FooterTemplate>
+					<DataTemplate>
+						<StackLayout Orientation="Horizontal" Padding="5,5,5,5">
+							<Button x:Name="newAmount" Text="Add New Amount" Clicked="Handle_Clicked" />
+						</StackLayout>
+					</DataTemplate>
+				</ListView.FooterTemplate>
+			</ListView>
+			<StackLayout Orientation="Horizontal">
+				<Button x:Name="calculate" Text="Calculate Total Amount" HorizontalOptions="Start" />
+				<Label x:Name="inText" Text=" in " VerticalOptions="Center" />
+				<Label x:Name="totalAmount" />
+				<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}">
+					
+				</Picker>
+			</StackLayout>
+		</StackLayout>
+	</ContentPage.Content>
+</ContentPage>
