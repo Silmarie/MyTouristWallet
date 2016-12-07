@@ -9,7 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace MyTouristWallet
 {
 	public partial class MyWallet : ContentPage
@@ -17,6 +19,8 @@ namespace MyTouristWallet
 		static Database database;
 		static List<CurrencyCall> calls = new List<CurrencyCall>();
 		ObservableCollection<Amount> amountList;
+
+		bool added;
 
 		Dictionary<string, string> currencies = new Dictionary<string, string>
 		{
@@ -26,6 +30,18 @@ namespace MyTouristWallet
 			{ "HKD", "Hong Kong Dollars" }
 		};
 
+		Dictionary<string, Color> colors = new Dictionary<string, Color>
+		{
+			{ "Aqua", Color.Aqua }, { "Black", Color.Black },
+			{ "Blue", Color.Blue }, { "Fuschia", Color.Fuchsia },
+			{ "Gray", Color.Gray }, { "Green", Color.Green },
+			{ "Lime", Color.Lime }, { "Maroon", Color.Maroon },
+			{ "Navy", Color.Navy }, { "Olive", Color.Olive },
+			{ "Purple", Color.Purple }, { "Red", Color.Red },
+			{ "Silver", Color.Silver }, { "Teal", Color.Teal },
+			{ "White", Color.White }, { "Yellow", Color.Yellow }
+		};
+
 		public MyWallet()
 		{
 			InitializeComponent();
@@ -33,15 +49,23 @@ namespace MyTouristWallet
 			amountList = new ObservableCollection<Amount>(Database.GetAmounts());
 			walletView.ItemsSource = amountList;
 
+			added = false;
+
 			foreach (string currencyName in currencies.Keys)
 			{
 				curr.Items.Add(currencyName);
 			}
 
-			/*foreach (string currencyName in currencies.Keys)
+			foreach (string currencyName in currencies.Keys)
 			{
-				newCurrency.Items.Add(currencyName);
-			}*/
+				newCurr.Items.Add(currencyName);
+			}
+
+			foreach (string c in colors.Keys)
+			{
+				colorPicker.Items.Add(c);
+			}
+			colorPicker.SelectedIndexChanged += changeBoxColor;
 
 			calculate.Clicked += SumAmounts;
 		}
@@ -58,7 +82,7 @@ namespace MyTouristWallet
 			}
 		}
 
-		void OnSelection(object sender, SelectedItemChangedEventArgs e)
+		async void OnSelection(object sender, SelectedItemChangedEventArgs e)
 		{
 			if (e.SelectedItem == null)
 			{
@@ -66,20 +90,49 @@ namespace MyTouristWallet
 				//ItemSelected is called on deselection, 
 				//which results in SelectedItem being set to null
 			}
+			var answer = await DisplayAlert("Question?", "Delete amount?", "Yes", "No");
+			if (answer)
+			{
+				amountList.Remove((Amount)e.SelectedItem);
+			}
 			//var vSelUser = (Employee)e.SelectedItem;
 			//Navigation.PushAsync(new ShowEmplyee(vSelUser));
 		}
 
-		void Handle_Clicked(object sender, System.EventArgs e)
+		void AddAmount(object sender, EventArgs e)
 		{
-		//	amountEntry.IsVisible = true;
+			if (added == false)
+			{
+				added = true;
+				newEntry.IsVisible = true;
+				decimal nValue = decimal.Parse(amountEntry.Text); //Usar TryParse com msg de erro!!
+				string nCurrency = newCurr.Items[newCurr.SelectedIndex];
+				string nDescription; 
+				if (!currencies.TryGetValue(nCurrency, out nDescription))
+				{
+					// the key isn't in the dictionary.
+					return; // or whatever you want to do
+				}
+				string nColor = colorPicker.Items[colorPicker.SelectedIndex];
+				Amount a = new Amount(nCurrency, nDescription, nValue, nColor);
+				amountList.Add(a);
+				Database.SaveAmount(a);
+			}
+			else {
+				added = false;
+				newEntry.IsVisible = false;
+			}
 		}
 
-		//Add new amount
-		void OnNewClicked(object sender, EventArgs args)
+		void changeBoxColor(object sender, System.EventArgs e)
 		{
-			//newCurrency.IsVisible = true;
-			//amountEntry.IsVisible = true;
+			Color cPreview;
+			if (!colors.TryGetValue(colorPicker.Items[colorPicker.SelectedIndex], out cPreview))
+			{
+				// the key isn't in the dictionary.
+				return; // or whatever you want to do
+			}
+			colorPreview.Color = cPreview;
 		}
 
 		private async void SumAmounts(object sender, EventArgs e)
@@ -87,13 +140,13 @@ namespace MyTouristWallet
 			if (curr.SelectedIndex == -1)
 				return;
 			string targetCurrency = curr.Items[curr.SelectedIndex];
-			decimal sum = Decimal.Zero;
+			decimal sum = decimal.Zero;
 			decimal convertedValue;
 
 			foreach (Amount a in amountList)
 			{
 				convertedValue = await ConvertValue(a.value, a.currency, targetCurrency);
-				sum = Decimal.Add(sum, convertedValue);
+				sum = decimal.Add(sum, convertedValue);
 			}
 
 			string targetCurrencyDescription;
@@ -102,7 +155,7 @@ namespace MyTouristWallet
 				// the key isn't in the dictionary.
 				return; // or whatever you want to do
 			}
-			inText.Text = "";
+			inText.IsVisible = false;
 			totalAmount.Text = "Total amount in your wallet is " + sum + " " + targetCurrencyDescription;
 		}
 
@@ -123,7 +176,7 @@ namespace MyTouristWallet
 			calls.Add(conversion);
 			//------
 
-			return conversion.rate;
+			return decimal.Multiply(conversion.rate, value);
 		}
 
 	}

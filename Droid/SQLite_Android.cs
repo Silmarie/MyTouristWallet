@@ -18,12 +18,11 @@ namespace MyTouristWallet.Droid
 		public SQLite.SQLiteConnection GetConnection()
 		{
 			var sqliteFilename = "DB.db3";
-			string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
+			string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal); // Documents folder
 			var path = Path.Combine(documentsPath, sqliteFilename);
-			Console.WriteLine(path);
-			if (!File.Exists(path)) File.Create(path);
+			// Create the connection
 			var conn = new SQLite.SQLiteConnection(path);
-			// Return the database connection 
+			// Return the database connection
 			return conn;
 		}
 	}

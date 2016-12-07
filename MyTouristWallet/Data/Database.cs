@@ -1,9 +1,7 @@
-﻿using System;
-using SQLite;
+﻿using SQLite;
 using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Forms;
-using MyTouristWallet;
 
 namespace MyTouristWallet
 {
@@ -13,13 +11,6 @@ namespace MyTouristWallet
 
 		SQLiteConnection database;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Tasky.DL.TaskDatabase"/> TaskDatabase. 
-		/// if the database doesn't exist, it will create the database and all the tables.
-		/// </summary>
-		/// <param name='path'>
-		/// Path.
-		/// </param>
 		public Database()
 		{
 			database = DependencyService.Get<ISQLite>().GetConnection();

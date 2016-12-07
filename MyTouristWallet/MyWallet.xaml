@@ -5,13 +5,19 @@
 	</ContentPage.Padding>
 	<ContentPage.Content>
 		<StackLayout Orientation="Vertical">
-			<ListView x:Name="walletView" HasUnevenRows="false" Header="Header Value" Footer="Footer" ItemSelected="OnSelection">
+			<StackLayout x:Name="newEntry" Orientation="Horizontal" IsVisible="false" HorizontalOptions="EndAndExpand" Padding="0,0,5,0" >
+				<Entry x:Name="amountEntry" Placeholder="Amount" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+				<Picker x:Name="colorPicker" Title="Color" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
+				<Picker x:Name="newCurr" Title="Currency" HorizontalOptions="EndAndExpand" SelectedIndex="{Binding currencies}" />
+				<BoxView x:Name="colorPreview" BindingContext="{x:Reference Name=colorPicker}" Color="{Binding SelectedValue}" VerticalOptions="Center" />
+			</StackLayout>
+			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value" Footer="Footer" ItemSelected="OnSelection">
 				<ListView.HeaderTemplate>
 					<DataTemplate>
 						<StackLayout Orientation="Horizontal" BackgroundColor="Blue" Padding="5,5,5,5">
-							<Label Text="Name" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
-							<Label Text="Designation" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
-							<Label Text="Department" FontSize="Medium" FontAttributes="Bold" TextColor="White" />
+							<Label Text="Amount" FontSize="Medium" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="Center" />
+							<Label Text="Currency" FontSize="Medium" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="Center" />
+							<Button x:Name="newAmount" Text="Add New Amount" Clicked="AddAmount" HorizontalOptions="EndAndExpand"/>
 						</StackLayout>
 					</DataTemplate>
 				</ListView.HeaderTemplate>
@@ -28,7 +34,7 @@
 				<ListView.FooterTemplate>
 					<DataTemplate>
 						<StackLayout Orientation="Horizontal" Padding="5,5,5,5">
-							<Button x:Name="newAmount" Text="Add New Amount" Clicked="Handle_Clicked" />
+							<BoxView Color="Maroon" />
 						</StackLayout>
 					</DataTemplate>
 				</ListView.FooterTemplate>
@@ -37,9 +43,7 @@
 				<Button x:Name="calculate" Text="Calculate Total Amount" HorizontalOptions="Start" />
 				<Label x:Name="inText" Text=" in " VerticalOptions="Center" />
 				<Label x:Name="totalAmount" />
-				<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}">
-					
-				</Picker>
+				<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}" HorizontalOptions="CenterAndExpand" />
 			</StackLayout>
 		</StackLayout>
 	</ContentPage.Content>

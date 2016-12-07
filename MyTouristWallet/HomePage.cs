@@ -11,6 +11,8 @@ namespace MyTouristWallet
 {
 	public class HomePage : ContentPage
 	{
+		static Database database;
+		ListView wallet;
 		Label lab1, lab2, labValue;
 		Entry entry1, entry2;
 		Button button;
@@ -25,8 +27,14 @@ namespace MyTouristWallet
 
 		public HomePage()
 		{
+			wallet = new ListView()
+			{
+				ItemsSource = Database.GetAmounts()
+			};
 
-			lab1 = new Label()
+			var dataTemplate = new DataTemplate(typeof(TextCell));
+			dataTemplate.SetBinding(TextCell.TextProperty, "Name");
+			/*lab1 = new Label()
 			{
 				HorizontalOptions = LayoutOptions.Start,
 				VerticalOptions = LayoutOptions.Center,
@@ -61,6 +69,7 @@ namespace MyTouristWallet
 				Title = "Currency",
 				HorizontalOptions = LayoutOptions.Start
 			};
+
 			foreach (string currencyName in currencies.Keys)
 			{
 				curr1.Items.Add(currencyName);
@@ -72,6 +81,7 @@ namespace MyTouristWallet
 				HorizontalOptions = LayoutOptions.Start
 
 			};
+
 			foreach (string currencyName in currencies.Keys)
 			{
 				curr2.Items.Add(currencyName);
@@ -115,14 +125,26 @@ namespace MyTouristWallet
 				HorizontalOptions = LayoutOptions.Center,
 				Text = "",
 				TextColor = Color.FromRgb(1.0, 0.9, 0.9)
-			};
+			};*/
 
 			Content = new StackLayout()
 			{
-				Children = { stack, button, labValue }
+				Children = { wallet/*, stack, button, labValue*/ }
 			};
 			Padding = new Thickness(5, Device.OnPlatform(20, 0, 0));
 			BackgroundColor = Color.Gray;
+		}
+
+		public static Database Database
+		{
+			get
+			{
+				if (database == null)
+				{
+					database = new Database();
+				}
+				return database;
+			}
 		}
 
 		private async void OnButton_Clicked(object sender, EventArgs e)
