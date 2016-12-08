@@ -19,6 +19,7 @@ namespace MyTouristWallet
 		static Database database;
 		static List<CurrencyCall> calls = new List<CurrencyCall>();
 		ObservableCollection<Amount> amountList;
+		AbsoluteLayout layout;
 
 		bool added;
 
@@ -33,7 +34,7 @@ namespace MyTouristWallet
 		Dictionary<string, Color> colors = new Dictionary<string, Color>
 		{
 			{ "Aqua", Color.Aqua }, { "Black", Color.Black },
-			{ "Blue", Color.Blue }, { "Fuschia", Color.Fuchsia },
+			{ "Blue", Color.Blue }, { "Fuchsia", Color.Fuchsia },
 			{ "Gray", Color.Gray }, { "Green", Color.Green },
 			{ "Lime", Color.Lime }, { "Maroon", Color.Maroon },
 			{ "Navy", Color.Navy }, { "Olive", Color.Olive },
@@ -66,6 +67,9 @@ namespace MyTouristWallet
 				colorPicker.Items.Add(c);
 			}
 			colorPicker.SelectedIndexChanged += changeBoxColor;
+
+			layout = new AbsoluteLayout();
+			layout.Padding = new Thickness(5, 5, 5, 5);
 
 			calculate.Clicked += SumAmounts;
 		}
@@ -105,9 +109,13 @@ namespace MyTouristWallet
 			{
 				added = true;
 				newEntry.IsVisible = true;
+			}
+			else {
+				added = false;
+				newEntry.IsVisible = false;
 				decimal nValue = decimal.Parse(amountEntry.Text); //Usar TryParse com msg de erro!!
 				string nCurrency = newCurr.Items[newCurr.SelectedIndex];
-				string nDescription; 
+				string nDescription;
 				if (!currencies.TryGetValue(nCurrency, out nDescription))
 				{
 					// the key isn't in the dictionary.
@@ -117,10 +125,6 @@ namespace MyTouristWallet
 				Amount a = new Amount(nCurrency, nDescription, nValue, nColor);
 				amountList.Add(a);
 				Database.SaveAmount(a);
-			}
-			else {
-				added = false;
-				newEntry.IsVisible = false;
 			}
 		}
 
@@ -142,12 +146,37 @@ namespace MyTouristWallet
 			string targetCurrency = curr.Items[curr.SelectedIndex];
 			decimal sum = decimal.Zero;
 			decimal convertedValue;
+			double pos = 0;
 
 			foreach (Amount a in amountList)
 			{
+				Color colorGraph;
+				if (!colors.TryGetValue(a.color, out colorGraph))
+				{
+					// the key isn't in the dictionary.
+					return; // or whatever you want to do
+				}
+
 				convertedValue = await ConvertValue(a.value, a.currency, targetCurrency);
+
+				var box = new BoxView 
+				{ 
+					Color = colorGraph, 
+					HeightRequest = (double)convertedValue 
+				};
+				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 0, 25, (double) convertedValue));
+				AbsoluteLayout.SetLayoutFlags(box, AbsoluteLayoutFlags.PositionProportional);
+
+				layout.Children.Add(box);
+
+				pos = pos + 0.1;
 				sum = decimal.Add(sum, convertedValue);
 			}
+
+			walletView.Footer = new ContentView
+			{
+				Content = layout
+			};
 
 			string targetCurrencyDescription;
 			if (!currencies.TryGetValue(targetCurrency, out targetCurrencyDescription))
@@ -156,24 +185,33 @@ namespace MyTouristWallet
 				return; // or whatever you want to do
 			}
 			inText.IsVisible = false;
-			totalAmount.Text = "Total amount in your wallet is " + sum + " " + targetCurrencyDescription;
+			totalAmount.Text = "You have " + sum + " " + targetCurrencyDescription + " total";
 		}
 
 		public static async Task<decimal> ConvertValue(decimal value, string firstCurrency, string secondCurrency)
 		{
 			string url = "http://download.finance.yahoo.com/d/quotes?f=sl1d1t1&s=" +
 				firstCurrency + secondCurrency + "=X";
+			string result = "";
 
-			var httpClient = new HttpClient();
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-			var response = await httpClient.SendAsync(request);
-			string result = await response.Content.ReadAsStringAsync();
-
+			try
+			{
+				var httpClient = new HttpClient();
+				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+				var response = await httpClient.SendAsync(request);
+				result = await response.Content.ReadAsStringAsync();
+			}
+			catch (Exception exception)
+			{
+				System.Diagnostics.Debug.WriteLine("CAUGHT EXCEPTION:");
+				System.Diagnostics.Debug.WriteLine(exception);
+			}
 			string[] answer = result.Split(',');
 
 			//save time by saving currency rates
 			CurrencyCall conversion = new CurrencyCall(answer[0], decimal.Parse(answer[1]), answer[2], answer[3]);
-			calls.Add(conversion);
+			//calls.Add(conversion);
+			Database.SaveCurrencyCall(conversion);
 			//------
 
 			return decimal.Multiply(conversion.rate, value);
