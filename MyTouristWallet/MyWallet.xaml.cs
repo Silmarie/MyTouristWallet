@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Linq;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace MyTouristWallet
@@ -197,12 +198,14 @@ namespace MyTouristWallet
 
 			try
 			{
+
 				var httpClient = new HttpClient();
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                httpClient.Timeout = TimeSpan.FromSeconds(2);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 				var response = await httpClient.SendAsync(request);
 				result = await response.Content.ReadAsStringAsync();
 				string[] answer = result.Split(',');
-				conversion = new CurrencyCall(answer[0], decimal.Parse(answer[1]), answer[2], answer[3]);
+				conversion = new CurrencyCall(answer[0].Replace("\"", ""), decimal.Parse(answer[1]), answer[2].Replace("\"", ""), answer[3].Replace("\"", "").Replace("\n", ""));
 				//save time by saving currency rates
 				calls.Add(conversion);
 				Database.SaveCurrencyCall(conversion);
@@ -210,19 +213,10 @@ namespace MyTouristWallet
 			catch (Exception exception)
 			{
 				string currenciesToConvert = firstCurrency + secondCurrency + "=X";
-				System.Diagnostics.Debug.WriteLine(currenciesToConvert);
-				List<CurrencyCall> callsDB = (List<CurrencyCall>)Database.GetCurrencyCallRate(currenciesToConvert);
-				//conversion = Database.GetCurrencyCallRate(currenciesToConvert);
-
-				System.Diagnostics.Debug.WriteLine("LISTCALLS_________________LISTCALLS:");
-				foreach (CurrencyCall c in Database.GetCurrencyCallRate(currenciesToConvert))
-				{
-					System.Diagnostics.Debug.WriteLine("YYYYYYYYYYYYYYYYYYYYY");
-					System.Diagnostics.Debug.WriteLine(c.currencies);
-				}
-
-				System.Diagnostics.Debug.WriteLine("CAUGHT EXCEPTION:");
-				System.Diagnostics.Debug.WriteLine(exception);
+				Debug.WriteLine(currenciesToConvert);
+                Debug.WriteLine("OFFLINE CONVERSION");
+                List<CurrencyCall> callsDB = (List<CurrencyCall>)Database.GetCurrencyCallRate(currenciesToConvert);
+				conversion = Database.GetCurrencyCallRate(currenciesToConvert).ElementAt(0);
 			}
 
 			return decimal.Multiply(conversion.rate, value);

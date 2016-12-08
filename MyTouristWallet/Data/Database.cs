@@ -41,7 +41,7 @@ namespace MyTouristWallet
 
 		public IEnumerable<CurrencyCall> GetCurrencyCallRate(string currs)
 		{
-			return database.Query<CurrencyCall>("SELECT * FROM [CurrencyCall] WHERE [currencies] = ?", currs);
+            return database.Query<CurrencyCall>("SELECT * FROM [CurrencyCall] WHERE [currencies] = ?", currs);
 		}
 
 		public int SaveAmount(Amount item)
