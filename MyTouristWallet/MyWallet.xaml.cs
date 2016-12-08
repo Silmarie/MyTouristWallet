@@ -25,10 +25,10 @@ namespace MyTouristWallet
 
 		Dictionary<string, string> currencies = new Dictionary<string, string>
 		{
-			{ "EUR", "Euro" },
-			{ "USD", "Dollars" },
-			{ "GBP", "Pounds" },
-			{ "HKD", "Hong Kong Dollars" }
+			{ "EUR", "euros" },
+			{ "USD", "dollars" },
+			{ "GBP", "pounds" },
+			{ "HKD", "hong kong dollars" }
 		};
 
 		Dictionary<string, Color> colors = new Dictionary<string, Color>
@@ -193,6 +193,7 @@ namespace MyTouristWallet
 			string url = "http://download.finance.yahoo.com/d/quotes?f=sl1d1t1&s=" +
 				firstCurrency + secondCurrency + "=X";
 			string result = "";
+			CurrencyCall conversion = new CurrencyCall("", 0, "", "");
 
 			try
 			{
@@ -200,19 +201,29 @@ namespace MyTouristWallet
 				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 				var response = await httpClient.SendAsync(request);
 				result = await response.Content.ReadAsStringAsync();
+				string[] answer = result.Split(',');
+				conversion = new CurrencyCall(answer[0], decimal.Parse(answer[1]), answer[2], answer[3]);
+				//save time by saving currency rates
+				calls.Add(conversion);
+				Database.SaveCurrencyCall(conversion);
 			}
 			catch (Exception exception)
 			{
+				string currenciesToConvert = firstCurrency + secondCurrency + "=X";
+				System.Diagnostics.Debug.WriteLine(currenciesToConvert);
+				List<CurrencyCall> callsDB = (List<CurrencyCall>)Database.GetCurrencyCallRate(currenciesToConvert);
+				//conversion = Database.GetCurrencyCallRate(currenciesToConvert);
+
+				System.Diagnostics.Debug.WriteLine("LISTCALLS_________________LISTCALLS:");
+				foreach (CurrencyCall c in Database.GetCurrencyCallRate(currenciesToConvert))
+				{
+					System.Diagnostics.Debug.WriteLine("YYYYYYYYYYYYYYYYYYYYY");
+					System.Diagnostics.Debug.WriteLine(c.currencies);
+				}
+
 				System.Diagnostics.Debug.WriteLine("CAUGHT EXCEPTION:");
 				System.Diagnostics.Debug.WriteLine(exception);
 			}
-			string[] answer = result.Split(',');
-
-			//save time by saving currency rates
-			CurrencyCall conversion = new CurrencyCall(answer[0], decimal.Parse(answer[1]), answer[2], answer[3]);
-			//calls.Add(conversion);
-			Database.SaveCurrencyCall(conversion);
-			//------
 
 			return decimal.Multiply(conversion.rate, value);
 		}

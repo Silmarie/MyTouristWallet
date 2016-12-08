@@ -39,9 +39,14 @@ namespace MyTouristWallet
 				return database.Table<CurrencyCall>().FirstOrDefault(x => x.ID == id);
 		}
 
+		public IEnumerable<CurrencyCall> GetCurrencyCallRate(string currs)
+		{
+			return database.Query<CurrencyCall>("SELECT * FROM [CurrencyCall] WHERE [currencies] = ?", currs);
+		}
+
 		public int SaveAmount(Amount item)
 		{
-				if (item.ID != 0)
+				if (item.ID != 0 /*|| database.Find<Amount>(item) != null*/)
 				{
 					database.Update(item);
 					return item.ID;
@@ -53,7 +58,8 @@ namespace MyTouristWallet
 
 		public int SaveCurrencyCall(CurrencyCall item)
 		{
-				if (item.ID != 0)
+			List<CurrencyCall> calls = database.Query<CurrencyCall>("SELECT * FROM [CurrencyCall] WHERE [currencies] = ?", item.currencies);
+			if (item.ID != 0 || calls.Count() > 0)
 				{
 					database.Update(item);
 					return item.ID;
