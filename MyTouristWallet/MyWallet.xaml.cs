@@ -97,8 +97,9 @@ namespace MyTouristWallet
 			}
 			var answer = await DisplayAlert("Question?", "Delete amount?", "Yes", "No");
 			if (answer)
-			{
-				amountList.Remove((Amount)e.SelectedItem);
+            {
+                database.DeleteAmount(((Amount)e.SelectedItem).ID);
+                amountList.Remove((Amount)e.SelectedItem);
 			}
 			//var vSelUser = (Employee)e.SelectedItem;
 			//Navigation.PushAsync(new ShowEmplyee(vSelUser));
@@ -148,8 +149,8 @@ namespace MyTouristWallet
 			decimal sum = decimal.Zero;
 			decimal convertedValue;
 			double pos = 0;
-
-			foreach (Amount a in amountList)
+            layout.Children.Clear();
+            foreach (Amount a in amountList)
 			{
 				Color colorGraph;
 				if (!colors.TryGetValue(a.color, out colorGraph))
@@ -167,7 +168,7 @@ namespace MyTouristWallet
 				};
 				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 0, 25, (double) convertedValue));
 				AbsoluteLayout.SetLayoutFlags(box, AbsoluteLayoutFlags.PositionProportional);
-
+                
 				layout.Children.Add(box);
 
 				pos = pos + 0.1;
@@ -186,7 +187,7 @@ namespace MyTouristWallet
 				return; // or whatever you want to do
 			}
 			inText.IsVisible = false;
-			totalAmount.Text = "You have " + sum + " " + targetCurrencyDescription + " total";
+			totalAmount.Text = "You have " + Math.Round(sum, 2) + " " + targetCurrencyDescription + " total";
 		}
 
 		public static async Task<decimal> ConvertValue(decimal value, string firstCurrency, string secondCurrency)
