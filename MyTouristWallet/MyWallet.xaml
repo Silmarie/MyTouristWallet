@@ -5,15 +5,15 @@
 	</ContentPage.Padding>
 	<ContentPage.Content>
 		<StackLayout x:Name="rootLayout" Orientation="Vertical">
-			<StackLayout x:Name="newEntry" Orientation="Horizontal" IsVisible="false" HorizontalOptions="Fill" Padding="15,0,15,0">
+			<StackLayout x:Name="newEntry" Orientation="Horizontal" IsVisible="false" Padding="15,0,15,0">
 				<StackLayout HorizontalOptions="Start" VerticalOptions="Center">
-					<Label x:Name="msgNewAmount" Text="Add Amount to wallet" HorizontalOptions="Start" VerticalOptions="Center">
+					<Label x:Name="msgNewAmount" Text="Add Amount to wallet" VerticalOptions="Center">
 						<Label.FontSize>
-							<OnPlatform x:TypeArguments="x:Double" iOS="8" Android="22" />
+							<OnPlatform x:TypeArguments="x:Double" iOS="8" Android="15" />
 						</Label.FontSize>
 					</Label>
 				</StackLayout>
-				<StackLayout HorizontalOptions="End" Orientation="Horizontal" VerticalOptions="Center">
+				<StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" VerticalOptions="Center">
 					<Entry x:Name="amountEntry" Placeholder="Amount" VerticalOptions="Center" Keyboard="Numeric" HorizontalTextAlignment="Center">
 						<Entry.Scale>
 							<OnPlatform x:TypeArguments="x:Double" iOS="0.6" Android="1.0" />
@@ -25,14 +25,20 @@
 						</Picker.Scale>
 					</Picker>
 					<Picker x:Name="colorPicker" Title="Color" IsVisible="false" />
-					<Button x:Name="colorPreview" Text="Color" BindingContext="{x:Reference Name=colorPicker}" BackgroundColor="{Binding SelectedValue}" WidthRequest="50" HeightRequest="30">
+					<Button x:Name="colorPreview" Text="Color" BindingContext="{x:Reference Name=colorPicker}" BackgroundColor="{Binding SelectedValue}">
 						<Button.FontSize>
-							<OnPlatform x:TypeArguments="x:Double" iOS="12" Android="22" />
+							<OnPlatform x:TypeArguments="x:Double" iOS="12" Android="20" />
 						</Button.FontSize>
+						<Button.WidthRequest>
+							<OnPlatform x:TypeArguments="x:Double" iOS="50" />
+						</Button.WidthRequest>
+						<Button.HeightRequest>
+							<OnPlatform x:TypeArguments="x:Double" iOS="20" />
+						</Button.HeightRequest>
 					</Button>
 				</StackLayout>
 			</StackLayout>
-			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value" Footer="" ItemSelected="OnSelection">
+			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value" Footer="">
 				<ListView.HeaderTemplate>
 					<DataTemplate>
 						<StackLayout Orientation="Horizontal" BackgroundColor="Teal" Padding="15,5,15,5">
@@ -69,7 +75,7 @@
 												<OnPlatform x:TypeArguments="x:String" iOS="Swipe to edit/delete" Android="Hold to edit/delete" />
 											</Label.Text>
 											<Label.FontSize>
-												<OnPlatform x:TypeArguments="x:Double" iOS="12" Android="22" />
+												<OnPlatform x:TypeArguments="x:Double" iOS="12" Android="15" />
 											</Label.FontSize>
 										</Label>
 									</StackLayout>
@@ -79,6 +85,9 @@
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
+				<AbsoluteLayout x:Name="chartValues" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
+				<AbsoluteLayout x:Name="chart" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
+				<AbsoluteLayout x:Name="chartLabel" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
 			<StackLayout x:Name="editAmount" IsVisible="false" HorizontalOptions="FillAndExpand" BackgroundColor="Silver">
 				<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
 					<Label Text="Enter new Amount: " FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center" />

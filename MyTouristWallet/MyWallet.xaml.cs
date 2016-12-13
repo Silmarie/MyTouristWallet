@@ -18,7 +18,6 @@ namespace MyTouristWallet
 		static List<CurrencyCall> calls = new List<CurrencyCall>();
 		ObservableCollection<Amount> amountList;
 		List<string> currenciesInWallet;
-		AbsoluteLayout layout;
 
 		bool added;
 
@@ -83,8 +82,6 @@ namespace MyTouristWallet
 				{
 					colorPicker.Focus();
 				};
-			layout = new AbsoluteLayout();
-			layout.Padding = new Thickness(15, 5, 15, 5);
 
 			calculate.Clicked += SumAmounts;
 		}
@@ -99,24 +96,6 @@ namespace MyTouristWallet
 				}
 				return database;
 			}
-		}
-
-		void OnSelection(object sender, SelectedItemChangedEventArgs e)
-		{
-			if (e.SelectedItem == null)
-			{
-				return;
-			}
-
-			editAmount.IsVisible = true;
-
-			int index = amountList.IndexOf((Amount)e.SelectedItem);
-			editValue.Clicked += (object s, EventArgs el) =>
-			{
-				amountList.ElementAt(index).AmountValue = decimal.Parse(newValue.Text);
-				Database.SaveAmount(amountList.ElementAt(index));
-				editAmount.IsVisible = false;
-			};
 		}
 
 		public void OnEdit(object sender, EventArgs e)
@@ -211,8 +190,11 @@ namespace MyTouristWallet
 			string targetCurrency = curr.Items[curr.SelectedIndex];
 			decimal sum = decimal.Zero;
 			decimal convertedValue;
-			double pos = 0;
-			layout.Children.Clear();
+			chart.Children.Clear();
+
+			var amountsConverted = new Dictionary<string, decimal>();
+			List<Color> colorsConverted = new List<Color>();
+
 			foreach (Amount a in amountList)
 			{
 				Color colorGraph;
@@ -221,34 +203,71 @@ namespace MyTouristWallet
 					return;
 				}
 
+				colorsConverted.Add(colorGraph);
+
 				convertedValue = await ConvertValue(a.AmountValue, a.currency, targetCurrency);
 
-				var box = new BoxView
-				{
-					Color = colorGraph,
-					HeightRequest = (double)convertedValue
-				};
-				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 0, 25, (double)convertedValue));
-				AbsoluteLayout.SetLayoutFlags(box, AbsoluteLayoutFlags.PositionProportional);
+				amountsConverted.Add(a.currency, convertedValue);
 
-				layout.Children.Add(box);
-
-				pos = pos + 0.1;
 				sum = decimal.Add(sum, convertedValue);
 			}
 
-			walletView.Footer = new ContentView
+			int i = 0;
+			double pos = 0;
+			foreach (string v in amountsConverted.Keys)
 			{
-				Content = layout
-			};
+				var valuesLabel = new Label
+				{
+					Text = amountsConverted[v].ToString()
+				};
+
+				var box = new BoxView
+				{
+					Color = colorsConverted.ElementAt(i),
+					HeightRequest = (double)amountsConverted[v]
+				};
+
+				var currencyLabel = new Label
+				{
+					Text = v
+				};
+
+				double width = 30, height = 20;
+				Device.OnPlatform(iOS: () => {
+					valuesLabel.FontSize = 10;
+					currencyLabel.FontSize = 10;
+					width = 25;
+					height = 10;
+				});
+
+				AbsoluteLayout.SetLayoutBounds(valuesLabel, new Rectangle(pos, 1, width, height));
+				AbsoluteLayout.SetLayoutFlags(valuesLabel, AbsoluteLayoutFlags.PositionProportional);
+
+				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 1, width, (double)amountsConverted[v]));
+				AbsoluteLayout.SetLayoutFlags(box, AbsoluteLayoutFlags.PositionProportional);
+
+				AbsoluteLayout.SetLayoutBounds(currencyLabel, new Rectangle(pos, 1, width, height));
+				AbsoluteLayout.SetLayoutFlags(currencyLabel, AbsoluteLayoutFlags.PositionProportional);
+
+				chartValues.Children.Add(valuesLabel);
+				chartLabel.Children.Add(currencyLabel);
+				chart.Children.Add(box);
+
+				i++;
+				pos = pos + 0.15;
+			}
 
 			string targetCurrencyDescription;
 			if (!currencies.TryGetValue(targetCurrency, out targetCurrencyDescription))
 			{
-				// the key isn't in the dictionary.
-				return; // or whatever you want to do
+				Debug.WriteLine("Currency not found in Dictionary");
+				return;
 			}
 			inText.IsVisible = false;
+			if (sum != 1)
+			{
+				targetCurrencyDescription += "s";
+			}
 			totalAmount.Text = "You have " + Math.Round(sum, 2) + " " + targetCurrencyDescription + " total";
 		}
 

@@ -30,7 +30,6 @@
   <ItemGroup>
     <Compile Include="MyTouristWallet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HomePage.cs" />
     <Compile Include="ISQLite.cs" />
     <Compile Include="Models\Amount.cs" />
     <Compile Include="Models\CurrencyCall.cs" />
