@@ -52,7 +52,7 @@ namespace MyTouristWallet
 		public MyWallet()
 		{
 			InitializeComponent();
-			Database.DeleteAllAmounts();
+
 			amountList = new ObservableCollection<Amount>(Database.GetAmounts());
 			currenciesInWallet = new List<string>();
 			walletView.ItemsSource = amountList;
@@ -212,7 +212,7 @@ namespace MyTouristWallet
 			chart.Children.Clear();
 
 			var amountsConverted = new Dictionary<string, decimal>();
-			List<Color> colorsConverted = new List<Color>();
+			var colorsConverted = new List<Color>();
 
 			foreach (Amount a in amountList)
 			{
