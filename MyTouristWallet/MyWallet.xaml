@@ -4,11 +4,11 @@
 		<OnPlatform x:TypeArguments="Thickness" iOS="0, 20, 0, 0" />
 	</ContentPage.Padding>
 	<ContentPage.Content>
-		<StackLayout Orientation="Vertical">
+		<StackLayout x:Name="rootLayout" Orientation="Vertical">
 			<StackLayout x:Name="newEntry" Orientation="Horizontal" IsVisible="false" HorizontalOptions="EndAndExpand" Padding="0,0,5,0">
-				<Entry x:Name="amountEntry" Placeholder="Amount" VerticalOptions="Center" HorizontalOptions="EndAndExpand" />
+				<Entry x:Name="amountEntry" Placeholder="Amount" VerticalOptions="Center" HorizontalOptions="Center" Keyboard="Numeric" HorizontalTextAlignment="Center" />
+				<Picker x:Name="newCurr" Title="Currency" SelectedIndex="{Binding currencies}" HorizontalOptions="Center" />
 				<Picker x:Name="colorPicker" Title="Color" VerticalOptions="Center" HorizontalOptions="FillAndExpand" />
-				<Picker x:Name="newCurr" Title="Currency" HorizontalOptions="EndAndExpand" SelectedIndex="{Binding currencies}" />
 				<BoxView x:Name="colorPreview" BindingContext="{x:Reference Name=colorPicker}" Color="{Binding SelectedValue}" VerticalOptions="Center" />
 			</StackLayout>
 			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value" Footer="" ItemSelected="OnSelection">
@@ -24,23 +24,40 @@
 				<ListView.ItemTemplate>
 					<DataTemplate>
 						<ViewCell>
-							<StackLayout Orientation="Horizontal" Padding="5,5,5,5" >
-								<Label Text="{Binding value}" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
-								<Label Text="{Binding description}" HorizontalOptions="StartAndExpand" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
-							</StackLayout>
+							<ViewCell.ContextActions>
+								<MenuItem Clicked="OnEdit" Text="Edit" CommandParameter="{Binding .}" />
+								<MenuItem Clicked="OnDelete" Text="Delete" IsDestructive="true" CommandParameter="{Binding .}" />
+							</ViewCell.ContextActions>
+							<ContentView>
+								<StackLayout Orientation="Horizontal" Padding="5,5,5,5">
+									<Label Text="{Binding AmountValue}" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
+									<Label Text="{Binding description}" HorizontalOptions="StartAndExpand" TextColor="{Binding color}" FontAttributes="Bold" FontSize="Medium" />
+									<Label HorizontalOptions="End" FontSize="Small">
+										<Label.Text>
+											<OnPlatform x:TypeArguments="x:String" iOS="Swipe to edit/delete" Android="Hold to edit/delete" />
+										</Label.Text>
+									</Label>
+								</StackLayout>
+							</ContentView>
 						</ViewCell>
 					</DataTemplate>
 				</ListView.ItemTemplate>
-
 			</ListView>
-			<StackLayout VerticalOptions="EndAndExpand" >
-				<StackLayout HorizontalOptions="Center">
-					<Label x:Name="totalAmount" FontAttributes="Bold" FontSize="Medium" />
+			<StackLayout x:Name="editAmount" IsVisible="false" HorizontalOptions="FillAndExpand" BackgroundColor="Silver">
+				<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+					<Label Text="Enter new Amount: " FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center" />
+					<Entry x:Name="newValue" Keyboard="Numeric" VerticalOptions="Center" />
+					<Button x:Name="editValue" Text="Confirm" VerticalOptions="Center" />
 				</StackLayout>
-				<StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand" >
-					<Button x:Name="calculate" Text="Calculate Total Amount" />
+			</StackLayout>
+			<StackLayout VerticalOptions="EndAndExpand">
+				<StackLayout HorizontalOptions="Center">
+					<Label x:Name="totalAmount" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
+				</StackLayout>
+				<StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+					<Button x:Name="calculate" Text="Calculate Total Amount" VerticalOptions="Center" />
 					<Label x:Name="inText" Text=" in " VerticalOptions="Center" />
-					<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}" />
+					<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}" VerticalOptions="Center" />
 				</StackLayout>
 			</StackLayout>
 		</StackLayout>

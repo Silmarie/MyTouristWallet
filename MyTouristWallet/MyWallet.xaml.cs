@@ -1,13 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Linq;
@@ -15,6 +11,7 @@ using System.Linq;
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace MyTouristWallet
 {
+
     public partial class MyWallet : ContentPage
     {
         static Database database;
@@ -25,12 +22,20 @@ namespace MyTouristWallet
         bool added;
 
         Dictionary<string, string> currencies = new Dictionary<string, string>
-        {
-            { "EUR", "euros" },
-            { "USD", "dollars" },
-            { "GBP", "pounds" },
-            { "HKD", "hong kong dollars" }
-        };
+		{
+			{ "EUR", "euro" },
+			{ "USD", "dollar" },
+			{ "GBP", "pound" },
+			{ "HKD", "hong kong dollar"},
+			{ "INR", "indian rupee"},
+			{ "AUD", "australian dollar" },
+			{ "CAD", "canadian dollar" },
+			{ "SGD", "singapore dollar" },
+			{ "CHF", "suiss franc" },
+			{ "MYR", "malaysian ringgit" },
+			{ "JPY", "japanese yen" },
+			{ "CNY", "chinese yuan renminbi" }
+		};
 
         Dictionary<string, Color> colors = new Dictionary<string, Color>
         {
@@ -87,32 +92,47 @@ namespace MyTouristWallet
             }
         }
 
-        async void OnSelection(object sender, SelectedItemChangedEventArgs e)
+        void OnSelection(object sender, SelectedItemChangedEventArgs e)
         {
             if (e.SelectedItem == null)
             {
-                return;
-                //ItemSelected is called on deselection, 
-                //which results in SelectedItem being set to null
-            }
-            string value = await InputBox(this.Navigation, (Amount)e.SelectedItem);
-            if (value != null && value != "")
-            {
-                ((Amount)e.SelectedItem).value = decimal.Parse(value);
-                database.SaveAmount((Amount)e.SelectedItem);
-                amountList.Remove((Amount)e.SelectedItem);
-                amountList.Add((Amount)e.SelectedItem);
+				return;
             }
 
-            /*var answer = await DisplayAlert("Question?", "Delete amount?", "Yes", "No");
-            if (answer)
-            {
-                database.DeleteAmount(((Amount)e.SelectedItem).ID);
-                amountList.Remove((Amount)e.SelectedItem);
-            }*/
-            //var vSelUser = (Employee)e.SelectedItem;
-            //Navigation.PushAsync(new ShowEmplyee(vSelUser));
+			editAmount.IsVisible = true;
+
+			int index = amountList.IndexOf((Amount)e.SelectedItem);
+			editValue.Clicked += (object s, EventArgs el) =>
+			{
+				amountList.ElementAt(index).AmountValue = decimal.Parse(newValue.Text);
+				Database.SaveAmount(amountList.ElementAt(index));
+				editAmount.IsVisible = false;
+			};
         }
+
+		public void OnEdit(object sender, EventArgs e)
+		{
+			var mi = ((MenuItem)sender);
+			var a = mi.CommandParameter as Amount;
+
+			editAmount.IsVisible = true;
+
+			int index = amountList.IndexOf(a);
+			editValue.Clicked += (object s, EventArgs el) =>
+			{
+				amountList.ElementAt(index).AmountValue = decimal.Parse(newValue.Text);
+				Database.SaveAmount(amountList.ElementAt(index));
+				editAmount.IsVisible = false;
+			};
+		}
+
+		public void OnDelete(object sender, EventArgs e)
+		{
+			var mi = ((MenuItem)sender);
+			var a = mi.CommandParameter as Amount;
+			database.DeleteAmount(a.ID);
+			amountList.Remove(a);
+		}
 
         void AddAmount(object sender, EventArgs e)
         {
@@ -134,13 +154,15 @@ namespace MyTouristWallet
                     return; // or whatever you want to do
                 }
                 string nColor = colorPicker.Items[colorPicker.SelectedIndex];
+				if (nValue != 1)
+					nDescription += "s";
                 Amount a = new Amount(nCurrency, nDescription, nValue, nColor);
                 amountList.Add(a);
                 Database.SaveAmount(a);
             }
         }
 
-        void changeBoxColor(object sender, System.EventArgs e)
+        void changeBoxColor(object sender, EventArgs e)
         {
             Color cPreview;
             if (!colors.TryGetValue(colorPicker.Items[colorPicker.SelectedIndex], out cPreview))
@@ -151,7 +173,7 @@ namespace MyTouristWallet
             colorPreview.Color = cPreview;
         }
 
-        private async void SumAmounts(object sender, EventArgs e)
+       	async void SumAmounts(object sender, EventArgs e)
         {
             if (curr.SelectedIndex == -1)
                 return;
@@ -169,7 +191,7 @@ namespace MyTouristWallet
                     return; // or whatever you want to do
                 }
 
-                convertedValue = await ConvertValue(a.value, a.currency, targetCurrency);
+				convertedValue = await ConvertValue(a.AmountValue, a.currency, targetCurrency);
 
                 var box = new BoxView
                 {
@@ -211,7 +233,7 @@ namespace MyTouristWallet
             {
 
                 var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(2);
+                httpClient.Timeout = TimeSpan.FromSeconds(5);
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 var response = await httpClient.SendAsync(request);
                 result = await response.Content.ReadAsStringAsync();
@@ -224,9 +246,8 @@ namespace MyTouristWallet
             catch (Exception exception)
             {
                 string currenciesToConvert = firstCurrency + secondCurrency + "=X";
-                Debug.WriteLine(currenciesToConvert);
                 Debug.WriteLine("OFFLINE CONVERSION");
-                List<CurrencyCall> callsDB = (List<CurrencyCall>)Database.GetCurrencyCallRate(currenciesToConvert);
+				Debug.WriteLine(exception);
                 conversion = Database.GetCurrencyCallRate(currenciesToConvert).ElementAt(0);
             }
 
@@ -240,7 +261,7 @@ namespace MyTouristWallet
 
             var lblTitle = new Label { Text = "Change quantity", HorizontalOptions = LayoutOptions.Center, FontAttributes = FontAttributes.Bold };
             var lblMessage = new Label { Text = "Enter new quantity:" };
-            var txtInput = new Entry { Text = "" + am.value };
+			var txtInput = new Entry { Text = "" + am.AmountValue };
 
             var btnOk = new Button
             {
@@ -293,18 +314,17 @@ namespace MyTouristWallet
                 Children = { btnDelete, btnOk, btnCancel },
             };
 
-            var layout = new StackLayout
-            {
-                Padding = new Thickness(0, 40, 0, 0),
-                VerticalOptions = LayoutOptions.StartAndExpand,
-                HorizontalOptions = LayoutOptions.CenterAndExpand,
-                Orientation = StackOrientation.Vertical,
-                Children = { lblTitle, lblMessage, txtInput, slButtons },
-            };
 
-            // create and show page
-            var page = new ContentPage();
-            page.Content = layout;
+			// create and show page
+			var page = new ContentPage();
+            page.Content = new StackLayout
+			{
+				Padding = new Thickness(0, 40, 0, 0),
+				VerticalOptions = LayoutOptions.StartAndExpand,
+				HorizontalOptions = LayoutOptions.CenterAndExpand,
+				Orientation = StackOrientation.Vertical,
+				Children = { lblTitle, lblMessage, txtInput, slButtons },
+			};
             navigation.PushModalAsync(page);
             // open keyboard
             txtInput.Focus();

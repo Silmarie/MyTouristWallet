@@ -46,7 +46,7 @@ namespace MyTouristWallet
 
 		public int SaveAmount(Amount item)
 		{
-				if (item.ID != 0 /*|| database.Find<Amount>(item) != null*/)
+				if (item.ID != 0)
 				{
 					database.Update(item);
 					return item.ID;
