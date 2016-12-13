@@ -84,7 +84,7 @@ namespace MyTouristWallet
 					colorPicker.Focus();
 				};
 			layout = new AbsoluteLayout();
-			layout.Padding = new Thickness(5, 5, 5, 5);
+			layout.Padding = new Thickness(15, 5, 15, 5);
 
 			calculate.Clicked += SumAmounts;
 		}
