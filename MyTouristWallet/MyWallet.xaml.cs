@@ -52,7 +52,7 @@ namespace MyTouristWallet
 		public MyWallet()
 		{
 			InitializeComponent();
-
+			Database.DeleteAllAmounts();
 			amountList = new ObservableCollection<Amount>(Database.GetAmounts());
 			currenciesInWallet = new List<string>();
 			walletView.ItemsSource = amountList;
@@ -132,6 +132,7 @@ namespace MyTouristWallet
 			var a = mi.CommandParameter as Amount;
 			database.DeleteAmount(a.ID);
 			amountList.Remove(a);
+			currenciesInWallet.Remove(a.currency);
 		}
 
 		void AddAmount(object sender, EventArgs e)
