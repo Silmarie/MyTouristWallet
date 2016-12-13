@@ -77,12 +77,24 @@ namespace MyTouristWallet
 			{
 				colorPicker.Items.Add(c);
 			}
+
+			Device.OnPlatform(iOS: () =>
+			{
+				walletView.Footer = new ContentView();
+			});
+
+			newCurr.SelectedIndexChanged += changeButtonCurrency;
+			newCurrButton.Clicked += (object s, EventArgs el) =>
+				{
+					newCurr.Focus();
+				};
 			colorPicker.SelectedIndexChanged += changeButtonColor;
 			colorPreview.Clicked += (object s, EventArgs el) =>
 				{
 					colorPicker.Focus();
 				};
 
+			curr.SelectedIndex = 0;
 			calculate.Clicked += SumAmounts;
 		}
 
@@ -173,6 +185,12 @@ namespace MyTouristWallet
 			}
 		}
 
+		void changeButtonCurrency(object sender, EventArgs e)
+		{
+			string currency = newCurr.Items[newCurr.SelectedIndex];
+			newCurrButton.Text = currency;
+		}
+
 		void changeButtonColor(object sender, EventArgs e)
 		{
 			Color cPreview = Color.Transparent;
@@ -189,7 +207,7 @@ namespace MyTouristWallet
 				return;
 			string targetCurrency = curr.Items[curr.SelectedIndex];
 			decimal sum = decimal.Zero;
-			decimal convertedValue;
+			decimal convertedValue, maxValue = decimal.Zero;
 			chart.Children.Clear();
 
 			var amountsConverted = new Dictionary<string, decimal>();
@@ -197,6 +215,11 @@ namespace MyTouristWallet
 
 			foreach (Amount a in amountList)
 			{
+				if (a.AmountValue > maxValue)
+				{
+					maxValue = a.AmountValue;
+				}
+
 				Color colorGraph;
 				if (!colors.TryGetValue(a.color, out colorGraph))
 				{
@@ -232,18 +255,20 @@ namespace MyTouristWallet
 					Text = v
 				};
 
-				double width = 30, height = 20;
+				double width = 30, height = 20, barHeight = (200*(double)amountsConverted[v])/(((double)maxValue) + 10);
 				Device.OnPlatform(iOS: () => {
 					valuesLabel.FontSize = 10;
 					currencyLabel.FontSize = 10;
 					width = 25;
 					height = 10;
+					barHeight = (100 * (double)amountsConverted[v]) / (((double)maxValue) + 10);
 				});
+
 
 				AbsoluteLayout.SetLayoutBounds(valuesLabel, new Rectangle(pos, 1, width, height));
 				AbsoluteLayout.SetLayoutFlags(valuesLabel, AbsoluteLayoutFlags.PositionProportional);
 
-				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 1, width, (double)amountsConverted[v]));
+				AbsoluteLayout.SetLayoutBounds(box, new Rectangle(pos, 1, width, barHeight));
 				AbsoluteLayout.SetLayoutFlags(box, AbsoluteLayoutFlags.PositionProportional);
 
 				AbsoluteLayout.SetLayoutBounds(currencyLabel, new Rectangle(pos, 1, width, height));

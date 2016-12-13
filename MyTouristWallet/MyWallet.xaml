@@ -19,26 +19,21 @@
 							<OnPlatform x:TypeArguments="x:Double" iOS="0.6" Android="1.0" />
 						</Entry.Scale>
 					</Entry>
-					<Picker x:Name="newCurr" Title="Currency" SelectedIndex="{Binding currencies}">
-						<Picker.Scale>
-							<OnPlatform x:TypeArguments="x:Double" iOS="0.6" Android="1.0" />
-						</Picker.Scale>
-					</Picker>
-					<Picker x:Name="colorPicker" Title="Color" IsVisible="false" />
+					<Picker x:Name="newCurr" Title="Currency" SelectedIndex="{Binding currencies}" IsVisible="false"/>
+					<Button x:Name="newCurrButton" Text="Currency" BindingContext="{x:Reference Name=newCurr}" BackgroundColor="{Binding SelectedValue}" />
+					<Picker x:Name="colorPicker" IsVisible="false" />
 					<Button x:Name="colorPreview" Text="Color" BindingContext="{x:Reference Name=colorPicker}" BackgroundColor="{Binding SelectedValue}">
-						<Button.FontSize>
-							<OnPlatform x:TypeArguments="x:Double" iOS="12" Android="20" />
-						</Button.FontSize>
+						
 						<Button.WidthRequest>
-							<OnPlatform x:TypeArguments="x:Double" iOS="50" />
+							<OnPlatform x:TypeArguments="x:Double" iOS="50" Android="100" />
 						</Button.WidthRequest>
 						<Button.HeightRequest>
-							<OnPlatform x:TypeArguments="x:Double" iOS="20" />
+							<OnPlatform x:TypeArguments="x:Double" iOS="10" Android="5" />
 						</Button.HeightRequest>
 					</Button>
 				</StackLayout>
 			</StackLayout>
-			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value" Footer="">
+			<ListView x:Name="walletView" VerticalOptions="Start" Header="Header Value">
 				<ListView.HeaderTemplate>
 					<DataTemplate>
 						<StackLayout Orientation="Horizontal" BackgroundColor="Teal" Padding="15,5,15,5">
@@ -85,16 +80,16 @@
 					</DataTemplate>
 				</ListView.ItemTemplate>
 			</ListView>
-				<AbsoluteLayout x:Name="chartValues" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
-				<AbsoluteLayout x:Name="chart" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
-				<AbsoluteLayout x:Name="chartLabel" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
-			<StackLayout x:Name="editAmount" IsVisible="false" HorizontalOptions="FillAndExpand" BackgroundColor="Silver">
+			<StackLayout x:Name="editAmount" IsVisible="false" HorizontalOptions="FillAndExpand" BackgroundColor="Silver" Padding="15,5,15,5">
 				<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
 					<Label Text="Enter new Amount: " FontSize="Medium" FontAttributes="Bold" VerticalOptions="Center" />
-					<Entry x:Name="newValue" Keyboard="Numeric" VerticalOptions="Center" />
+					<Entry x:Name="newValue" Text="New Value" Keyboard="Numeric" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
 					<Button x:Name="editValue" Text="Confirm" VerticalOptions="Center" />
 				</StackLayout>
 			</StackLayout>
+				<AbsoluteLayout x:Name="chartValues" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
+				<AbsoluteLayout x:Name="chart" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
+				<AbsoluteLayout x:Name="chartLabel" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" Padding="15, 5, 15, 5" />
 			<StackLayout VerticalOptions="EndAndExpand">
 				<StackLayout HorizontalOptions="Center">
 					<Label x:Name="totalAmount" FontAttributes="Bold" FontSize="Medium" VerticalOptions="Center" />
@@ -102,7 +97,7 @@
 				<StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
 					<Button x:Name="calculate" Text="Calculate Total Amount" VerticalOptions="Center" />
 					<Label x:Name="inText" Text=" in " VerticalOptions="Center" />
-					<Picker x:Name="curr" Title="Currency" SelectedIndex="{Binding currencies}" VerticalOptions="Center" />
+					<Picker x:Name="curr" Title="" SelectedIndex="{Binding currencies}" VerticalOptions="Center" HorizontalOptions="Center" />
 				</StackLayout>
 			</StackLayout>
 		</StackLayout>
